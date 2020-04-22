@@ -14,7 +14,8 @@ import matplotlib as mpl
 from calendar import monthrange
 from ecmwfapi import ECMWFDataServer
 import os
-server = ECMWFDataServer()
+
+server = ECMWFDataServer(url="https://api.ecmwf.int/v1",key="cd85b3670e9c314f617d7b36f50b032f",email="C.C.Symonds@leeds.ac.uk")
 
 year = '2015'
 
@@ -51,20 +52,20 @@ for months in ['02']:
 
     GFAS_target = 'GFAS_2015_'+months+'_auto.nc'
 
-    #server.retrieve({
-    #    "class": "mc",
-    #    "dataset": "cams_gfas",
-    #    "date": daterange,
-    #    "expver": "0001",
-    #    "levtype": "sfc",
-    #    "param": "81.210/87.210",
-    #    "step": "0-24",
-    #    "stream": "gfas",
-    #    "time": "00:00:00",
-    #    "type": "ga",
-    #    "target": GFAS_target,
-    #    "format": "netcdf",
-    #})
+    server.retrieve({
+        "class": "mc",
+        "dataset": "cams_gfas",
+        "date": daterange,
+        "expver": "0001",
+        "levtype": "sfc",
+        "param": "81.210/87.210",
+        "step": "0-24",
+        "stream": "gfas",
+        "time": "00:00:00",
+        "type": "ga",
+        "target": GFAS_target,
+        "format": "netcdf",
+    })
 
     print ('Retrieved file '+GFAS_target+'.\n\nProcessing....')
 
