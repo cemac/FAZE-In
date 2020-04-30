@@ -72,7 +72,7 @@ def next_path(path_pattern):
     i = 1
 
     # First do an exponential search
-    while os.path.exists(path_pattern % i):
+    while path.exists(path_pattern % i):
         i = i * 2
 
     # Result lies somewhere in the interval (i/2..i]
@@ -80,7 +80,7 @@ def next_path(path_pattern):
     a, b = (i // 2, i)
     while a + 1 < b:
         c = (a + b) // 2 # interval midpoint
-        a, b = (c, b) if os.path.exists(path_pattern % c) else (a, c)
+        a, b = (c, b) if path.exists(path_pattern % c) else (a, c)
 
     return path_pattern % b
 
@@ -130,7 +130,7 @@ def retrieve_GFAS(processdir, gfasdate):
     Out : Path to downloaded GFAS data file (in netCDF format)
     '''
 
-    server = ECMWFDataServer()
+    server = ECMWFDataServer(url="https://api.ecmwf.int/v1",key="cd85b3670e9c314f617d7b36f50b032f",email="C.C.Symonds@leeds.ac.uk")
 
     GFAS_path = path.join(processdir,"GFAS")
 
@@ -197,11 +197,6 @@ def process_gfas(gfaspath, processdir, gfasdate):
     PM25_kg_area = PM25_kg[:,lats_area,:][:,:, lons_area]
     CO_kg_area = CO_kg[:,lats_area, :][:,:,lons_area]
 
-    syear,smonth,sday=gfasdate.split('-')
-    nyear=int(syear)
-    nmonth=int(smonth)
-    nday=int(sday)
-
     RELEASES_dir = path.join(processdir,"RELEASES")
 
     try:
@@ -210,13 +205,16 @@ def process_gfas(gfaspath, processdir, gfasdate):
         # directory already exists
         pass
 
-    fname = 'releases_GFAS_'+syear+smonth+sday+'_maxpartsfrac_750mHeight-%s.txt'
+    fname = 'releases_GFAS_'+gfasdate.replace('-','')+'_maxpartsfrac_750mHeight.txt'
 
     releasesfile=path.join(RELEASES_dir, fname)
 
+    if path.exists(releasesfile):
+        releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
+
     print ('Processing releases file for  '+ gfasdate)
 
-    day_mass = np.sum(PM25_kg_area[nday-1,:,:])
+    day_mass = np.sum(PM25_kg_area[0,:,:])
     fact = day_mass/450000
 
     with open(releasesfile,'w') as f_new:
@@ -229,16 +227,16 @@ def process_gfas(gfaspath, processdir, gfasdate):
         count =0
         for i in np.arange(0,400):   ### for all gridcells
             for j in np.arange(0,600):
-                if PM25_kg_area[nday-1,i,j]>1:  ## if there are emissions from gridcell
-                    num_parts = PM25_kg_area[nday-1,i,j]/fact
+                if PM25_kg_area[0,i,j]>1:  ## if there are emissions from gridcell
+                    num_parts = PM25_kg_area[0,i,j]/fact
                     if num_parts < 5:
                         num_parts = 5
                     if num_parts > 300:
                         num_parts = 300
                     count = count +1
-                    startday = year+month+day
+                    startday = gfasdate.replace('-','')
                     starttime = '000000'
-                    endday = year+month+day
+                    endday = gfasdate.replace('-','')
                     endtime = '230000'
                     lon1 = lonmin+(j/10.)
                     lon2 = lonmin+(j/10.)+0.1
@@ -247,16 +245,16 @@ def process_gfas(gfaspath, processdir, gfasdate):
                     height1 = 0
                     height2 = 750
                     heightkind = 1
-                    mass1 = CO_kg_area[nday-1,i,j])
-                    mass2 = PM25_kg_area[nday-1,i,j])
+                    mass1 = CO_kg_area[0,i,j]
+                    mass2 = PM25_kg_area[0,i,j]
                     parts = int(num_parts)
                     comment = '"Fire {:05d}"'.format(count)
 
                     ### Write to new file ###
                     f_new.write('&RELEASE                   ! For each release \n')
-                    f_new.write(' IDATE1  = {:>14d}, ! Release start date, YYYYMMDD: YYYY=year, MM=month, DD=day \n'.format(startday))
+                    f_new.write(' IDATE1  = {:>14s}, ! Release start date, YYYYMMDD: YYYY=year, MM=month, DD=day \n'.format(startday))
                     f_new.write(' ITIME1  = {:>14s}, ! Release start time in UTC HHMISS: HH hours, MI=minutes, SS=seconds \n'.format(starttime))
-                    f_new.write(' IDATE2  = {:>14d}, ! Release end date, same as IDATE1 \n'.format(endday) )
+                    f_new.write(' IDATE2  = {:>14s}, ! Release end date, same as IDATE1 \n'.format(endday) )
                     f_new.write(' ITIME2  = {:>14s}, ! Release end time, same as ITIME1 \n'.format(endtime) )
                     f_new.write(' LON1    = {:>14.2f}, ! Left longitude of release box -180 < LON1 <180 \n'.format(lon1) )
                     f_new.write(' LON2    = {:>14.2f}, ! Right longitude of release box, same as LON1 \n'.format(lon2) )
