@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
 import matplotlib as mpl
-from calendar import monthrange
+from datetime import timedelta
 from ecmwfapi import ECMWFDataServer
 from os import path, getcwd, makedirs, chdir
 import argparse
@@ -91,7 +91,7 @@ def getargs():
     and convert it to FLEXPART releases format.
 
     In : None
-    Out: Date of data in "YYYY-MM-DD" format
+    Out: Date(s) of data in "YYYY-MM-DD" format
     '''
 
     parser = argparse.ArgumentParser(description=(
@@ -99,35 +99,66 @@ def getargs():
         'Requires date for GFAS data in YYYY-MM-DD format as input argument.'
         ))
 
-    parser.add_argument('date', #'-i',
+    parser.add_argument('startdate',
                         type=str,
-                        help='Date for which data is required. Should be in format "YYYY-MM-DD"')
+                        help='[REQUIRED]\nFirst date for which data is required. Should be in format "YYYY-MM-DD"\n'+
+                             'If data from only one date required, give that date here')
 
+    parser.add_argument('enddate', '-e',
+                        type=str,
+                        default="None"
+                        help='[OPTIONAL]Last date for which data is required. Should be in format "YYYY-MM-DD"\n'+
+                             'Only required if multiple days of data needed, for example in a cold start')
 
     args = parser.parse_args()
 
     # Validate the date
 
-    date=dateparse.parse(args.date).date()
+    startdate=dateparse.parse(args.startdate).date()
 
-    if ( date.year != args.date[:4] and date.month <= 12 and date.day <= 12 ):
-        raise ArgumentsError("Date was not in ISO 8601 format (YYYY-MM-DD), and date "+
+    if ( startdate.year != int(args.startdate[:4]) and startdate.month <= 12 and startdate.day <= 12 ):
+        raise ArgumentsError("Start date was not in ISO 8601 format (YYYY-MM-DD), and date "+
         "parser cannot infer true date as both month and day are below 12 and "+
         "could be month-first or day-first format.\n"+
         "Please retry using the recommended ISO 8601 format (YYYY-MM-DD)")
-        return "0000-00-00"
+        return ("0000-00-00", "None")
     else:
-        return date.strftime("%Y-%m-%d")
+        strtstr = startdate.strftime("%Y-%m-%d")
+
+    if args.enddate != "None":
+         enddate=dateparse.parse(args.enddate).date()
+         if ( enddate.year != int(args.enddate[:4]) and enddate.month <= 12 and enddate.day <= 12 ):
+             raise ArgumentsError("End date was not in ISO 8601 format (YYYY-MM-DD), and date "+
+             "parser cannot infer true date as both month and day are below 12 and "+
+             "could be month-first or day-first format.\n"+
+             "Please retry using the recommended ISO 8601 format (YYYY-MM-DD)")
+             return (startdate, "0000-00-00")
+        else:
+            endstr = enddate.strftime("%Y-%m-%d")
+    else:
+        endstr = "None"
+
+    if not enddate >= startdate:
+        raise ArgumentsError("Enddate was not after startdate\n"+
+                             "Please retry with valid dates")
+        return ("0000-00-00","0000-00-00")
+    elif enddate == startdate:
+        print ("Enddate and startdate were the same. For single day,"+
+               " there is no need to include end date.")
+        endstr = "None"
+
+    return (strtstr,endstr)
 
 
-def retrieve_GFAS(processdir, gfasdate):
+def retrieve_GFAS(processdir, gfasdate, gfasend="None"):
     '''
     Retrieve GFAS fire data from ECMWF using ECMWF api
 
     In : processdir - working directory path
          gfasdate   - date for data to be retrieved
+         gfasend    - end date for set of days
 
-    Out : Path to downloaded GFAS data file (in netCDF format)
+    Out : Path to downloaded GFAS data file(s) (in netCDF format)
     '''
 
     server = ECMWFDataServer(url="https://api.ecmwf.int/v1",key="cd85b3670e9c314f617d7b36f50b032f",email="C.C.Symonds@leeds.ac.uk")
@@ -142,12 +173,23 @@ def retrieve_GFAS(processdir, gfasdate):
 
     chdir(GFAS_path)
 
-    GFAS_target = 'GFAS_2015_'+gfasdate+'_auto.nc'
+    if gfasend == "None"
+
+        GFAS_target = 'GFAS_2015_'+gfasdate+'_auto.nc'
+        datadate = gfasdate
+
+    else:
+
+        date1=dateparse.parse(gfasdate).date()
+        date2=dateparse.parse(gfasend).date()
+        datelen="{0:03d}".format((date2-date1).days)
+        GFAS_target = 'GFAS_2015_'+gfasdate+'_+'+datelen+'days_auto.nc'
+        datadate=gfasdate+'/to/'+gfasend
 
     server.retrieve({
         "class": "mc",
         "dataset": "cams_gfas",
-        "date": gfasdate,
+        "date": datadate,
         "expver": "0001",
         "levtype": "sfc",
         "param": "81.210/87.210",
@@ -163,7 +205,7 @@ def retrieve_GFAS(processdir, gfasdate):
 
     return path.join(GFAS_path,GFAS_target)
 
-def process_gfas(gfaspath, processdir, gfasdate):
+def process_gfas(gfaspath, processdir, gfasdate, enddate):
     '''
     Process GFAS netCDF file into a FlexPart RELEASES file, listing
     each emission-containing gridpoint separately for use in FlexPart
@@ -171,7 +213,8 @@ def process_gfas(gfaspath, processdir, gfasdate):
 
     In: gfaspath   - path to GFAS netCDF file
         processdir - working directory
-        gfasdate   - date of GFAS data (only single day)
+        gfasdate   - start date of GFAS data
+        enddate    - end date of GFAS data
 
     Out: Status code
     '''
@@ -205,86 +248,106 @@ def process_gfas(gfaspath, processdir, gfasdate):
         # directory already exists
         pass
 
-    fname = 'releases_GFAS_'+gfasdate.replace('-','')+'_maxpartsfrac_750mHeight.txt'
+    date1=dateparse.parse(gfasdate).date()
+    date2=dateparse.parse(enddate).date()
+    datelen=(date2-date1).days
 
-    releasesfile=path.join(RELEASES_dir, fname)
+    for day in range (0,datelen+1):
 
-    if path.exists(releasesfile):
-        releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
+        date = (date1 + timedelta(days=day)).strftime("%Y-%m-%d")
 
-    print ('Processing releases file for  '+ gfasdate)
+        fname = 'releases_GFAS_'+date.replace('-','')+'.txt'
 
-    day_mass = np.sum(PM25_kg_area[0,:,:])
-    fact = day_mass/450000
+        releasesfile=path.join(RELEASES_dir, fname)
 
-    with open(releasesfile,'w') as f_new:
+        if path.exists(releasesfile):
+            releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
 
-        f_new.write('&RELEASES_CTRL \n')
-        f_new.write(' NSPEC      =           3, ! Total number of species \n')
-        f_new.write(' SPECNUM_REL=  22, 24, 40, ! Species numbers in directory SPECIES  \n')
-        f_new.write(' / \n')
+        print ('Processing releases file for  '+ date)
 
-        count =0
-        for i in np.arange(0,400):   ### for all gridcells
-            for j in np.arange(0,600):
-                if PM25_kg_area[0,i,j]>1:  ## if there are emissions from gridcell
-                    num_parts = PM25_kg_area[0,i,j]/fact
-                    if num_parts < 5:
-                        num_parts = 5
-                    if num_parts > 300:
-                        num_parts = 300
-                    count = count +1
-                    startday = gfasdate.replace('-','')
-                    starttime = '000000'
-                    endday = gfasdate.replace('-','')
-                    endtime = '230000'
-                    lon1 = lonmin+(j/10.)
-                    lon2 = lonmin+(j/10.)+0.1
-                    lat1 = latmin+(i/10.)
-                    lat2 = latmin+(i/10.)+0.1
-                    height1 = 0
-                    height2 = 750
-                    heightkind = 1
-                    mass1 = CO_kg_area[0,i,j]
-                    mass2 = PM25_kg_area[0,i,j]
-                    parts = int(num_parts)
-                    comment = '"Fire {:05d}"'.format(count)
+        day_mass = np.sum(PM25_kg_area[day,:,:])
+        fact = day_mass/450000
+
+        with open(releasesfile,'w') as f_new:
+
+            f_new.write('&RELEASES_CTRL \n')
+            f_new.write(' NSPEC      =           3, ! Total number of species \n')
+            f_new.write(' SPECNUM_REL=  22, 24, 40, ! Species numbers in directory SPECIES  \n')
+            f_new.write(' / \n')
+
+            count =0
+            for i in np.arange(0,400):   ### for all gridcells
+                for j in np.arange(0,600):
+                    if PM25_kg_area[day,i,j]>1:  ## if there are emissions from gridcell
+                        num_parts = PM25_kg_area[day,i,j]/fact
+                        if num_parts < 5:
+                            num_parts = 5
+                        if num_parts > 300:
+                            num_parts = 300
+                        count = count +1
+                        startday = date.replace('-','')
+                        starttime = '000000'
+                        endday = date.replace('-','')
+                        endtime = '230000'
+                        lon1 = lonmin+(j/10.)
+                        lon2 = lonmin+(j/10.)+0.1
+                        lat1 = latmin+(i/10.)
+                        lat2 = latmin+(i/10.)+0.1
+                        height1 = 0
+                        height2 = 750
+                        heightkind = 1
+                        mass1 = CO_kg_area[day,i,j]
+                        mass2 = PM25_kg_area[day,i,j]
+                        parts = int(num_parts)
+                        comment = '"Fire {:05d}"'.format(count)
 
                     ### Write to new file ###
-                    f_new.write('&RELEASE                   ! For each release \n')
-                    f_new.write(' IDATE1  = {:>14s}, ! Release start date, YYYYMMDD: YYYY=year, MM=month, DD=day \n'.format(startday))
-                    f_new.write(' ITIME1  = {:>14s}, ! Release start time in UTC HHMISS: HH hours, MI=minutes, SS=seconds \n'.format(starttime))
-                    f_new.write(' IDATE2  = {:>14s}, ! Release end date, same as IDATE1 \n'.format(endday) )
-                    f_new.write(' ITIME2  = {:>14s}, ! Release end time, same as ITIME1 \n'.format(endtime) )
-                    f_new.write(' LON1    = {:>14.2f}, ! Left longitude of release box -180 < LON1 <180 \n'.format(lon1) )
-                    f_new.write(' LON2    = {:>14.2f}, ! Right longitude of release box, same as LON1 \n'.format(lon2) )
-                    f_new.write(' LAT1    = {:>14.2f}, ! Lower latitude of release box, -90 < LAT1 < 90 \n'.format(lat1) )
-                    f_new.write(' LAT2    = {:>14.2f}, ! Upper latitude of release box same format as LAT1 \n'.format(lat2) )
-                    f_new.write(' Z1      = {:>14d}, ! Lower height of release box meters/hPa above reference level \n'.format(height1) )
-                    f_new.write(' Z2      = {:>14d}, ! Upper height of release box meters/hPa above reference level \n'.format(height2) )
-                    f_new.write(' ZKIND   = {:>14d}, ! Reference level 1=above ground, 2=above sea level, 3 for pressure in hPa \n'.format(heightkind) )
-                    f_new.write(' MASS    =   {0:.12f}, {1:.12f}, {1:.12f}, ! Total mass emitted, only relevant for fwd simulations \n'.format(mass1, mass2) )
-                    f_new.write(' PARTS   = {:>14d}, ! Total number of particles to be released \n'.format(parts) )
-                    f_new.write(' COMMENT = {:>14s}, ! Comment, written in the outputfile \n'.format(comment) )
-                    f_new.write(' / \n')
+                        f_new.write('&RELEASE                   ! For each release \n')
+                        f_new.write(' IDATE1  = {:>14s}, ! Release start date, YYYYMMDD: YYYY=year, MM=month, DD=day \n'.format(startday))
+                        f_new.write(' ITIME1  = {:>14s}, ! Release start time in UTC HHMISS: HH hours, MI=minutes, SS=seconds \n'.format(starttime))
+                        f_new.write(' IDATE2  = {:>14s}, ! Release end date, same as IDATE1 \n'.format(endday) )
+                        f_new.write(' ITIME2  = {:>14s}, ! Release end time, same as ITIME1 \n'.format(endtime) )
+                        f_new.write(' LON1    = {:>14.2f}, ! Left longitude of release box -180 < LON1 <180 \n'.format(lon1) )
+                        f_new.write(' LON2    = {:>14.2f}, ! Right longitude of release box, same as LON1 \n'.format(lon2) )
+                        f_new.write(' LAT1    = {:>14.2f}, ! Lower latitude of release box, -90 < LAT1 < 90 \n'.format(lat1) )
+                        f_new.write(' LAT2    = {:>14.2f}, ! Upper latitude of release box same format as LAT1 \n'.format(lat2) )
+                        f_new.write(' Z1      = {:>14d}, ! Lower height of release box meters/hPa above reference level \n'.format(height1) )
+                        f_new.write(' Z2      = {:>14d}, ! Upper height of release box meters/hPa above reference level \n'.format(height2) )
+                        f_new.write(' ZKIND   = {:>14d}, ! Reference level 1=above ground, 2=above sea level, 3 for pressure in hPa \n'.format(heightkind) )
+                        f_new.write(' MASS    =   {0:.12f}, {1:.12f}, {1:.12f}, ! Total mass emitted, only relevant for fwd simulations \n'.format(mass1, mass2) )
+                        f_new.write(' PARTS   = {:>14d}, ! Total number of particles to be released \n'.format(parts) )
+                        f_new.write(' COMMENT = {:>14s}, ! Comment, written in the outputfile \n'.format(comment) )
+                        f_new.write(' / \n')
 
     return 0
 
 
 def main():
 
+    # Change line here to direct releases file to be placed in the correct place
     processdir = getcwd()
 
-    gfasdate = getargs()
+    (gfasdate,enddate) = getargs()
 
     gfaspath = retrieve_GFAS(processdir, gfasdate)
 
-    stat = process_gfas(gfaspath, processdir, gfasdate)
+    if enddate == "None":
 
-    if stat == 0:
-        print('RELEASES file written successfully')
+        stat = process_gfas(gfaspath, processdir, gfasdate,gfasdate)
+
+        if stat == 0:
+            print('RELEASES file written successfully')
+        else:
+            print('RELEASES file not written successfully')
+
     else:
-        print('RELEASES file not written successfully')
+
+        stat = process_gfas(gfaspath, processdir, gfasdate,enddate)
+
+        if stat == 0:
+            print('RELEASES files written successfully')
+        else:
+            print('RELEASES files not written successfully')
 
 
 if __name__ == "__main__":

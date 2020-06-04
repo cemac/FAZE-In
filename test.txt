@@ -1,0 +1,23 @@
+mkdir -p /nfs/earcemac/chmcsy/FlexPart/test_cronflex
+sed -i 2s@.*@/nfs/earcemac/chmcsy/FlexPart/test_cronflex/@ /scratch/chmcsy/fwd_gfs_test/pathnames
+rm /scratch/chmcsy/data/gfs*
+rm /scratch/chmcsy/data/fnl*
+cd /scratch/chmcsy/data
+./make_available
+cd /scratch/chmcsy/fwd_gfs_test
+rm /scratch/chmcsy/fwd_gfs_test/options/RELEASES*
+cp get_fire_RELEASES_GFAS_daily.py /scratch/chmcsy/fwd_gfs_test/options/
+python /scratch/chmcsy/fwd_gfs_test/options/get_fire_RELEASES_GFAS_daily.py 2020-05-31
+sed -i "9s/.*/ IBDATE=         20200531, ! Start date of the simulation   ; YYYYMMDD: YYYY=year, MM=month, DD=day /" /scratch/chmcsy/fwd_gfs_test/options/COMMAND
+sed -i "11s/.*/ IEDATE=         20200531,! End date of the simulation     ; same format as IBDATE  /" /scratch/chmcsy/fwd_gfs_test/options/COMMAND
+sed -i \'25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /\' /scratch/chmcsy/fwd_gfs_test/options/COMMAND
+warm start
+rm /nfs/earcemac/chmcsy/FlexPart/test_cronflex/partposit_end
+cp "/nfs/earcemac/chmcsy/FlexPart/test_cronflex/partposit_20200531000000" "/nfs/earcemac/chmcsy/FlexPart/test_cronflex/partposit_end"
+sed -i \'25s/.*/ IPIN=                  1, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /\' /scratch/chmcsy/fwd_gfs_test/options/COMMAND
+rm /nfs/earcemac/chmcsy/FlexPart/test_cronflex/partposit_*
+FLEXPART
+mkdir "/nfs/earcemac/chmcsy/FlexPart/test_cronflex/20200531"
+cp /nfs/earcemac/chmcsy/FlexPart/test_cronflex/partposit_*000000 "/nfs/earcemac/chmcsy/FlexPart/test_cronflex/20200531/"
+cp "/nfs/earcemac/chmcsy/FlexPart/test_cronflex/header /nfs/earcemac/chmcsy/FlexPart/test_cronflex/20200531/"
+old_run_day=
