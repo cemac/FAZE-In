@@ -50,7 +50,6 @@ fi
 #Retrieve ERA5 data using flex_extract tool and make AVAILABLE file
 
 conda activate flex_extract
-
 #${flextractdir}/Source/Python/submit.py --controlfile CONTROL_EA5.0.5.6h --date_chunk $datechunk --start_date $strtday --end_date $endday --outputdir ${scratchdir}
 
 python $rundir/download_gfs.py ${strtday} ${endday} ${scratchdir}
