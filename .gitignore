@@ -2,6 +2,6 @@
 data/*
 GFAS/*
 RELEASES/*
-WebApp/Applications/__pycache__/*
-WebApp/Applications/FlaskApp/__pycache__/*
+*/__pycache__/*
+__pycache__/*
 WebApp/Applications/data/*

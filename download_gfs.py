@@ -35,6 +35,7 @@ import urllib.request
 import time
 from bs4 import BeautifulSoup
 import requests
+import re
 
 def getargs():
 
@@ -201,8 +202,8 @@ def get_gfs(start_date,end_date,destination,variant="4"):
             file_list_http = getfilelist(d, variant)
             file_list = create_filenames(d,variant)
             for f in file_list:
-                if f in file_list_ftp:
-                    print ("  "+f+ " found, download as "+destination+f)
+                if f in file_list_http:
+                    print ("  "+f+ " found, download as "+os.path.join(destination,f))
                     download_file(baseurl, f, destination)
                 else:
                     print ("  "+ f + "not found")
