@@ -29,6 +29,12 @@ DISCLAIMER
 
 """
 
+import argparse
+import dateutil.parser as dateparse
+import os
+from ftplib import FTP
+import datetime
+
 def getargs():
     '''
     Retrieve the required date of data from command line arguments
@@ -118,7 +124,6 @@ def download_file(path, filename, destination):
     """
         downloads files from path and saves to destination
     """
-    import os
     command = "wget -q -O "+destination+"/"+filename+" ftp://nomads.ncdc.noaa.gov/"+path+"/"+filename
     os.system(command)
 
@@ -133,10 +138,6 @@ def get_gfs(start_date,end_date,destination,variant="4"):
         Retrieves gfs data between supplied dates
     """
 
-    import sys
-    from ftplib import FTP
-    import datetime
-
     print ("Retrieving GFS data for selected dates:")
 
     # print input arguments
@@ -146,9 +147,8 @@ def get_gfs(start_date,end_date,destination,variant="4"):
     check_path(destination)
 
     if not (variant == "3" or variant == "4"):
-        print ("Only GFS 3 or GFS 4 are valid.\n"+
+        raise ArgumentsError ("Only GFS 3 or GFS 4 are valid.\n"+
                "Variant chosen was {}\n".format(variant))
-        sys.exit()
 
     start_ftp_date = startFtpDate()
 
