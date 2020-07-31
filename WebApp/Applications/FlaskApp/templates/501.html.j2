@@ -1,0 +1,13 @@
+{% extends "layout.html.j2" %}
+{% block title %}Page Not Found{% endblock %}
+{% block body %}
+<h1>Unhandled Error</h1>
+<p style="text-align: center"> Hey! You broke the website!
+<center>
+<img src="/static/error.jpg" alt="501 error" >
+</center>
+
+<p style="text-align: center"> Not, really you just caught an error! It would be really helpful to shoot me an email telling me about this:
+  cemac-help@leeds.ac.uk or c.c.symonds@leeds.ac.uk
+<p style="text-align: center"><a href="{{ url_for('main_bp.index') }}">return home</a>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "layout.html.j2" %}
+{% block title %}Forbidden{% endblock %}
+{% block body %}
+<h1>Forbidden</h1>
+<p> Oops, You don't have access to that.
+<p><a href="{{ url_for('main_bp.index') }}">return to home</a>
+{% endblock %}

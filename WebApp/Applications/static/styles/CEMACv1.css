@@ -1,0 +1,51 @@
+body {
+
+    font-family: Helvetica, Arial, sans-serif;
+
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+/* Additional CSS  */
+.column2 {
+  float: left;
+  width: 45%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+ /* Responsive layout - when the screen is less than 600px wide, make the three columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
+}
+
+.collist3 {
+  -webkit-column-count: 3; /* Old Chrome, Safari and Opera */
+  -moz-column-count: 3; /* Old Firefox */
+  column-count: 3;
+}
+
+.collist4 {
+  -webkit-column-count: 4; /* Old Chrome, Safari and Opera */
+  -moz-column-count: 4; /* Old Firefox */
+  column-count: 4;
+}
+
+.collist2 {
+  -webkit-column-count: 2; /* Old Chrome, Safari and Opera */
+  -moz-column-count: 2; /* Old Firefox */
+  column-count: 2;
+  with: 20% ;
+}

@@ -1,0 +1,44 @@
+<br>
+<nav class="navbar-cemac" style="background-color: #e56819">
+  <div class="navcontainer" style="width:100%; margin:auto;">
+    <div class="navbar-brand">
+      <a href="/">Home</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="/about">About</a></li>
+        <li><a href="/infopage1">Info Page 1</a></li>
+        <li><a href="/infopage2">Info Page 2</a></li>
+        <li><a href="/infopage3">Info Page 3</a></li>
+        <li><a href="/glossary">Glossary</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        {% if session.usertype == "Admins"%}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin Menu<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/admin/users">Users</a></li>
+            <li><a href="/admin/information">Admin info</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if session.logged_in %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Logged in as <b>{{session.username}}</b></li>
+            <li><a href=/change-pwd>Change Password</a> </li>
+            <li><a href=/account/{{session.username}}>Account</a> </li>
+            <li><a href=/logout>Logout </a> </li>
+          </ul>
+        </li>
+        {% else %}
+        <li><a href="/login"><span class="glyphicon glyphicon-log-in"> Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+<br>

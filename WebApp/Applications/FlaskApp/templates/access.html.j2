@@ -1,0 +1,16 @@
+{% extends 'layout.html.j2' %}
+
+{% block body %}
+<h1>{{title}}</h1>
+<hr>
+{% from "includes/_formhelpers.html.j2" import render_field %}
+<form action=/access/{{id}} method="POST">
+  {% for field in form %}
+  <div class="form-group">
+    {{render_field(field, class_="form-control")}}
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<hr>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'layout.html.j2' %}
+
+{% block body %}
+
+<div style="text-align: center">
+  <p>
+    This online tool presents the backwards simulation of fire haze in indonesia, tracking PM2.5 back to its source [more accurate description once full use of tool is crystalised]</p>
+
+  <p><center> Animation for the last <i>8</i> days </center></p>
+</div><!-- .entry-content -->
+<img src onerror='init()'>
+<div style="width:75%; margin: 0 auto">
+  <canvas id="mapCanvas" width="900" height="1000"></canvas>
+</div>
+
+<script>
+
+
+function init() {
+
+  var stage = new createjs.Stage("mapCanvas");
+	stage.enableMouseOver();
+	createjs.Touch.enable(stage);
+	stage.mouseMoveOutside = true;
+
+
+  var spritedays = 8;
+  var spritecount = 8 * spritedays;
+
+  var spriteData = new createjs.SpriteSheet({
+    framerate:16,
+    "images":["/static/sprites/spritesheet.png"],
+    "frames": {"height": 800, "count": spritecount, "width": 900},
+    "animations":{
+    }
+  });
+
+  var animation = new createjs.Sprite(spriteData);
+
+  stage.addChild(animation);
+
+	var slider = new Slider(0, spritecount-1, 900, 35).set({x: 0, y: 850, value: 0});
+  slider.on("load", function() {
+    animation.gotoAndStop(0);
+    stage.update();
+  });
+  slider.on("change", function() {
+    animation.gotoAndStop(slider.value);
+    stage.update();
+  });
+
+	stage.addChild(slider);
+	stage.update();
+
+}
+
+</script>
+{% endblock %}

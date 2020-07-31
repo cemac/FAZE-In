@@ -30,7 +30,7 @@ day=$( date -d '-2 days 13:00' +"%Y%m%d" )
 mkdir -p ${out_dir}
 
 # Make pathnames file
-#cat > ${testdir}/pathnames <<-EOF
+cat > ${testdir}/pathnames <<-EOF
 $testdir/options
 $out_dir
 $scratchdir
@@ -41,8 +41,8 @@ if [ "$warm_strt" = TRUE ]; then
   datechunk=3 # 1 day, plus one on either side
   strtday=$day
   endday=$day
-else;
-  datechunk=32 # 30 days, plus one on either side
+else
+  datechunk=22 # 20 days, plus one on either side
   endday=$day
   strtday=$( date -d "$day -$datechunk days" +"%Y%m%d" )
 fi
@@ -51,7 +51,9 @@ fi
 
 conda activate flex_extract
 
-${flextractdir}/Source/Python/submit.py --controlfile CONTROL_EA5.0.5.6h --date_chunk $datechunk --start_date $strtday --end_date $endday --outputdir ${scratchdir}
+#${flextractdir}/Source/Python/submit.py --controlfile CONTROL_EA5.0.5.6h --date_chunk $datechunk --start_date $strtday --end_date $endday --outputdir ${scratchdir}
+
+python $rundir/download_gfs.py ${strtday} ${endday} ${scratchdir}
 
 cd ${scratchdir}
 ./make_available

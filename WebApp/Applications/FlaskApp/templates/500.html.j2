@@ -1,0 +1,13 @@
+{% extends "layout.html.j2" %}
+{% block title %}Internal Error{% endblock %}
+{% block body %}
+<h1>Internal Error</h1>
+<p style="text-align: center"> A server side error has been encountered.
+<center>
+<img src="/static/error.jpg" alt="500 error" >
+</center>
+
+<p style="text-align: center"> It would be really helpful to shoot me an email telling me about this:
+  cemac-help@leeds.ac.uk or c.c.symonds@leeds.ac.uk
+<p style="text-align: center"><a href="{{ url_for('main_bp.index') }}">return home</a>
+{% endblock %}

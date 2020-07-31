@@ -1,0 +1,27 @@
+{% extends 'layout.html.j2' %}
+{% block body %}
+<div style="text-align: justify">
+<center>
+<h1> Admin information page </h1>
+</center>
+<p> You are logged in with admin privileges. As such you are able to access and edit the user list and assign roles to users.
+
+<h2> Roles </h2>
+The following roles can be assigned
+<ul>
+  <li>Public - Anyone can veiw the iFEED data.</li>
+  <li>Registerd Users - Anyone can sign up and register to use the additional on the fly analysis features on the reduced data set.</li>
+  <li>Collaborators - Registered users can request access to become Collaborators and access or download the full data set and run on-the-fly analysis on the full data set.</li>
+  <li>Admin - Can edit user list, assign access to users, add new users.</li>
+</ul>
+</div>
+<h2> CEMAC support </h2>
+If there is an edit you can not make yourself, you spot an error or even a feature request then contact CEMAC via one of the following methods*.
+<ol>
+  <li>Log an issue on github (<i> depends on final privacy setting </i>)</li>
+  <li><a href="mailto:cemac-support@leeds.ac.uk?Subject=iFEED%20Prototype%20site%20help" target="_top">Email cemac support</a></li>
+  <li>Email <a href="mailto:c.c.symonds@leeds.ac.uk?Subject=iFEED%20Prototype%20site%20help" target="_top">Chris</a> directly (site generated in 2020)</li>
+</ol>
+
+{% endblock %}
+</html>

@@ -1,0 +1,68 @@
+{% extends 'layout.html.j2' %}
+{% block body %}
+<h1>{{title}}</h1>
+<p>{{description}} </p>
+{% if tableClass == 'Users' %}
+<p> List of Users and their current assigned site role </p>
+{% endif %}
+{% if editLink == "edit" %}
+<a class="btn btn-success" href="/add/{{tableClass}}" role="button"><b>+</b> Add entry</a>
+{% endif %}
+<div>
+  <table id="myTable"  class="display" style="width:100%">
+    <thead>
+      <tr>
+        {% for col in colnames %}
+        <th>{{col}}</th>
+        {% endfor %}
+        <th></th>
+        {% if editLink == "edit" %}
+        <td></td>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for index, row in data.iterrows() %}
+        <tr>
+          {% for i in range(1,row|length) %}
+            <td>{{row[i]}}</td>
+          {% endfor %}
+        <td>
+            <a href=/access/{{row['id']}} class="btn btn-primary pull-right">Edit Access Settings</a>
+        </td>
+
+        {% if editLink == "edit" %}
+        <td>
+          <form action=/delete/{{tableClass}}/{{row['id']}} method="post" onsubmit="return confirm('Are you sure?');">
+            <input type="hidden" name="_method" value="DELETE">
+            <input type="submit" value="Delete" class="btn btn-danger">
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<hr>
+{% endblock %}
+{% block scripts %}
+<!-- Datatables functionality - must have same columns in thead and tbody
+i.e. account for the edit buttons appearing or dissappearing - I have chosen
+to leave a hidden space for update button and create extra space in the admin
+tables  -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<script>
+$(document).ready(function(){
+  $('.dropdown-toggle').dropdown();
+  var table = $('#myTable').DataTable({
+    columnDefs: [
+        {targets: [5,6,7], orderable: false, searchable : false}
+    ],
+      order: [[0, "asc"]]
+  });
+});
+</script>
+{% endblock %}
+</html>

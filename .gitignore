@@ -1,3 +1,6 @@
 *.nc
 GFAS/*
 RELEASES/*
+WebApp/Applications/__pycache__/*
+WebApp/Applications/FlaskApp/__pycache__/*
+WebApp/Applications/data/*
