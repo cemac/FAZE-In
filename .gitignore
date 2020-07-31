@@ -1,4 +1,5 @@
 *.nc
+data/*
 GFAS/*
 RELEASES/*
 WebApp/Applications/__pycache__/*

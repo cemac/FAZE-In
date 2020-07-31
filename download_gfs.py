@@ -29,13 +29,18 @@ DISCLAIMER
 
 """
 
-import argparse
-import dateutil.parser as dateparse
 import os
-from ftplib import FTP
 import datetime
+import urllib.request
+import time
+from bs4 import BeautifulSoup
+import requests
 
 def getargs():
+
+    import argparse
+    import dateutil.parser as dateparse
+
     '''
     Retrieve the required date of data from command line arguments
     aas well as the output directory.
@@ -109,27 +114,52 @@ def create_filenames(d,variant):
         only t=0 and t=3 will be downloaded
     """
 
-    if variant == "3":
-        ext = ".grb"
-    else:
-        ext = ".grb2"
+#    if variant == "3":
+#        ext = ".grb"
+#    else:
+#        ext = ".grb2"
+
+    ext = ".grb2"
 
     filelist = list()
     for t in ["0000", "0600", "1200", "1800"]:
         for t2 in ["000", "003"]:
-            filelist.append("gfsanl_"+variant+"_"+d.strftime('%Y%m%d')+"_"+t+"_"+t2+ext)
+            filelist.append("gfs_"+variant+"_"+d.strftime('%Y%m%d')+"_"+t+"_"+t2+ext)
     return filelist
+
+def geturl(d,variant):
+
+    if variant=="3":
+        grid = "grid-003-1.0-degree"
+    else:
+        grid = "grid-004-0.5-degree"
+
+    return "https://www.ncei.noaa.gov/data/global-forecast-system/access/"+grid+"/forecast/"+d.strftime('%Y%m')+"/"+d.strftime('%Y%m%d')+"/"
+
+def getfilelist(d,variant):
+
+    url = geturl(d, variant)
+
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    alllinks = [x['href'] for x in soup.findAll('a')[5:]]
+
+    return [x for x in alllinks if re.search("_00(0|3).grb2?$",x)]
 
 def download_file(path, filename, destination):
     """
         downloads files from path and saves to destination
     """
-    command = "wget -q -O "+destination+"/"+filename+" ftp://nomads.ncdc.noaa.gov/"+path+"/"+filename
-    os.system(command)
+
+    download_url = path + link
+
+    urllib.request.urlretrieve(download_url,os.path.join(destination,link))
+
+    time.sleep(1)
 
 def startFtpDate():
     """
-        from this date 0.5 degree grid data exists on ftp
+        from this date 0.5 degree grid data exists on http
     """
     return datetime.date(2020,5,15)
 
@@ -156,36 +186,29 @@ def get_gfs(start_date,end_date,destination,variant="4"):
         start_date, end_date = end_date, start_date
 
     if (start_date<start_ftp_date):
-        raise ArgumentsError("The FTP-Server only provides data after the 15th May 2020, please choose another date!\n\n")
+        raise ArgumentsError("The HTTPS-Server only provides data after the 15th May 2020, please choose another date!\n\n")
 
     print ("start downloading from "+start_date.strftime("%Y-%m-%d")+" to "+end_date.strftime("%Y-%m-%d"))
 
     # create date list
     date_list = [start_date + datetime.timedelta(days=x) for x in range(0, (end_date-start_date).days+1)]
 
-    # connect to ftp
-    ftp = FTP('nomads.ncdc.noaa.gov')
-    ftp.login()
-
     # iter through date_list and download
+
     for d in date_list:
-        path = "GFS/analysis_only/"+d.strftime('%Y%m')+"/"+d.strftime('%Y%m%d')+"/"
+        baseurl = geturl(d,variant)
         try:
-            ftp.cwd(path)
-            print ("{} found".format(path))
-            file_list_ftp = ftp.nlst()
+            file_list_http = getfilelist(d, variant)
             file_list = create_filenames(d,variant)
             for f in file_list:
                 if f in file_list_ftp:
                     print ("  "+f+ " found, download as "+destination+f)
-                    download_file(path, f, destination)
+                    download_file(baseurl, f, destination)
                 else:
                     print ("  "+ f + "not found")
-            ftp.cwd("../../../../")
         except:
             print (d.strftime('%Y-%m-%d') + " Directory not found")
 
-    ftp.quit()
     print ("")
 
 def main():
