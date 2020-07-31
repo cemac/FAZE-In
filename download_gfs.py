@@ -58,7 +58,7 @@ def getargs():
                         type=str,
                         help='Last date for which data is required. Should be in format "YYYY-MM-DD"\n')
 
-    parser.add_argumment('outdir',
+    parser.add_argument('outdir',
                          type=str,
                          help='Output directory for grib files from GFS')
 
@@ -84,7 +84,7 @@ def getargs():
 
     # Validate the output path, or generate it from default value
 
-    path_out = args.output
+    path_out = args.outdir
 
     if not os.path.exists(path_out):
         print('Directory to write gfs files to'
@@ -131,7 +131,7 @@ def startFtpDate():
     """
         from this date 0.5 degree grid data exists on ftp
     """
-    return datetime.date(2020,05,15)
+    return datetime.date(2020,5,15)
 
 def get_gfs(start_date,end_date,destination,variant="4"):
     """
@@ -143,8 +143,6 @@ def get_gfs(start_date,end_date,destination,variant="4"):
     # print input arguments
     print ("Start: {}\n".format(start_date.strftime("%Y-%m-%d")))
     print ("End:   {}\n\n".format(end_date.strftime("%Y-%m-%d")))
-
-    check_path(destination)
 
     if not (variant == "3" or variant == "4"):
         raise ArgumentsError ("Only GFS 3 or GFS 4 are valid.\n"+
