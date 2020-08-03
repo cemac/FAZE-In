@@ -9,11 +9,11 @@ GFS_FNL_FILES="$(\ls ${DATA_DIR}/fnl* 2> /dev/null)"
 if [ -e "${DATA_DIR}/AVAILABLE" ] ; then
   \mv ${DATA_DIR}/AVAILABLE     ${DATA_DIR}/AVAILABLE.$(date +%s)
 fi
-cat > ${DATA_DIR}/AVAILABLE <<EOH
+cat > ${DATA_DIR}/AVAILABLE <<-EOF
 DATE      TIME     FILNAME     SPECIFICATIONS
 YYYYMMDD  HHMMSS
 _____________________________________________
-EOH
+EOF
 if [ ! -z "${ERA_FILES}" ] ; then
   for i in ${ERA_FILES}
   do
@@ -26,9 +26,9 @@ elif [ ! -z "${GFS_FILES}" ] ; then
   for i in ${GFS_FILES}
   do
     f=$(basename ${i})
-    d="${f:9:8}"
-    h="${f:18:2}"
-    a="${f:25:1}"
+    d="${f:6:8}"
+    h="${f:15:2}"
+    a="${f:22:1}"
     t="$(printf '%02d' $((${h} + ${a})))0000"
     echo "${d} ${t}      ${f}      ON DISC" >> ${DATA_DIR}/AVAILABLE
   done

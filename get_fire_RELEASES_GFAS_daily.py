@@ -106,7 +106,7 @@ def getargs():
 
     parser.add_argument('enddate', '-e',
                         type=str,
-                        default="None"
+                        default="None",
                         help='[OPTIONAL]Last date for which data is required. Should be in format "YYYY-MM-DD"\n'+
                              'Only required if multiple days of data needed, for example in a cold start')
 
@@ -133,8 +133,8 @@ def getargs():
              "could be month-first or day-first format.\n"+
              "Please retry using the recommended ISO 8601 format (YYYY-MM-DD)")
              return (startdate, "0000-00-00")
-        else:
-            endstr = enddate.strftime("%Y-%m-%d")
+         else:
+             endstr = enddate.strftime("%Y-%m-%d")
     else:
         endstr = "None"
 
@@ -173,7 +173,7 @@ def retrieve_GFAS(processdir, gfasdate, gfasend="None"):
 
     chdir(GFAS_path)
 
-    if gfasend == "None"
+    if gfasend == "None":
 
         GFAS_target = 'GFAS_2015_'+gfasdate+'_auto.nc'
         datadate = gfasdate
