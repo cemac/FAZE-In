@@ -147,7 +147,7 @@ def getfilelist(d,variant):
 
     return [x for x in alllinks if re.search("_00(0|3).grb2?$",x)]
 
-def download_file(path, filename, destination):
+def download_file(path, link, destination):
     """
         downloads files from path and saves to destination
     """
