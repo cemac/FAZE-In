@@ -228,6 +228,8 @@ def process_gfas(gfaspath, processdir, gfasdate, enddate):
     PM25 = GFAS_file.variables['pm2p5fire'][:]    ##kg/m2/s
     CO = GFAS_file.variables['cofire'][:]     ##kg/m2/s
 
+    GFAS_file.close()
+
     lat = np.flip(lat, axis = 0)     #-90 to 90
     PM25 = np.flip(PM25,axis = 1 )
     CO = np.flip(CO,axis = 1 )
@@ -240,7 +242,7 @@ def process_gfas(gfaspath, processdir, gfasdate, enddate):
     PM25_kg_area = PM25_kg[:,lats_area,:][:,:, lons_area]
     CO_kg_area = CO_kg[:,lats_area, :][:,:,lons_area]
 
-    RELEASES_dir = path.join(processdir,"RELEASES")
+    RELEASES_dir = path.join(processdir,"options")
 
     try:
         makedirs(RELEASES_dir)
@@ -251,29 +253,27 @@ def process_gfas(gfaspath, processdir, gfasdate, enddate):
     date1=dateparse.parse(gfasdate).date()
     date2=dateparse.parse(enddate).date()
     datelen=(date2-date1).days
+    
+    releasesfile = path.join(RELEASES_dir,"RELEASES")
+    
+    if path.exists(releasesfile):
+        releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
+    
+    with open(releasesfile,'w') as f_new:
 
-    for day in range (0,datelen+1):
+        f_new.write('&RELEASES_CTRL \n')
+        f_new.write(' NSPEC      =           3, ! Total number of species \n')
+        f_new.write(' SPECNUM_REL=  22, 24, 40, ! Species numbers in directory SPECIES  \n')
+        f_new.write(' / \n')
 
-        date = (date1 + timedelta(days=day)).strftime("%Y-%m-%d")
+        for day in range (0,datelen+1):
 
-        fname = 'releases_GFAS_'+date.replace('-','')+'.txt'
+            date = (date1 + timedelta(days=day)).strftime("%Y-%m-%d")
 
-        releasesfile=path.join(RELEASES_dir, fname)
+            print ('Processing releases file for  '+ date)
 
-        if path.exists(releasesfile):
-            releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
-
-        print ('Processing releases file for  '+ date)
-
-        day_mass = np.sum(PM25_kg_area[day,:,:])
-        fact = day_mass/450000
-
-        with open(releasesfile,'w') as f_new:
-
-            f_new.write('&RELEASES_CTRL \n')
-            f_new.write(' NSPEC      =           3, ! Total number of species \n')
-            f_new.write(' SPECNUM_REL=  22, 24, 40, ! Species numbers in directory SPECIES  \n')
-            f_new.write(' / \n')
+            day_mass = np.sum(PM25_kg_area[day,:,:])
+            fact = day_mass/450000
 
             count =0
             for i in np.arange(0,400):   ### for all gridcells

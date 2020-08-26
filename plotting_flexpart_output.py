@@ -14,7 +14,7 @@ import dateutil.parser as dateparse
 from datetime import timedelta
 from sys import stderr, exit
 import argparse
-from os import path
+from os import path, makedirs
 
 class ArgumentsError(Exception):
     '''
@@ -83,17 +83,17 @@ def getargs():
 
     datapath = args.datapath
 
-    if not os.path.exists(datapath):
+    if not path.exists(datapath):
         print('Directory to write gfs files to'
               + ' does not exist\nAttempting to create:')
         try:
-            os.makedirs(datapath)
+            makedirs(datapath)
         except:
             raise FatalError('Could not create directory '+ datapath +'\n')
         else:
             print ("Success!\n")
 
-    if datapath and not os.path.isdir(datapath):
+    if datapath and not path.isdir(datapath):
         raise FatalError(datapath + ' exists but is not a directory\n')
 
 
@@ -101,10 +101,6 @@ def getargs():
 
 
 def main():
-
-    filename = 'cronflex'
-    c = 'green'
-    lab = 'GFS & emissions up to 750m'
 
     (date,datapath) = getargs()
 

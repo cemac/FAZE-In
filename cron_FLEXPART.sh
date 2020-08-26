@@ -72,7 +72,9 @@ echo "Fazein conda activated"
 
 rm ${testdir}/options/RELEASES*
 cp $rundir/get_fire_RELEASES_GFAS_daily.py ${testdir}/options/
-python ${testdir}/options/get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) --enddate $( date -d $endday +'%F' )
+cd ${testdir}/options
+python get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) --enddate $( date -d $endday +'%F' )
+cd ..
 
 echo "GFAS files retrieved"
 
