@@ -11,7 +11,7 @@ module load gnu/4.8.1
 module load flexpart
 
 # Need a test here to see if a warm start is possible.
-warm_strt=TRUE
+warm_strt=FALSE
 
 # Dir paths
 rundir=$PWD
@@ -22,7 +22,7 @@ out_dir="${flexdir}/test_cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$( date -d '-2 days 13:00' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-16 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as outpuexitt directory in pathnames
 #out_dir=${flexdir}/daily/$( date -d $day +"%Y%m%d" )/
@@ -47,10 +47,14 @@ else
   strtday=$( date -d "$day -$datechunk days" +"%Y%m%d" )
 fi
 
+echo "Data to be retrieved between $strtday and $endday"
+
 #Retrieve ERA5 data using flex_extract tool and make AVAILABLE file
 
 conda activate flex_extract
 #${flextractdir}/Source/Python/submit.py --controlfile CONTROL_EA5.0.5.6h --date_chunk $datechunk --start_date $strtday --end_date $endday --outputdir ${scratchdir}
+
+echo "Conda env activated for flex_extract"
 
 python $rundir/download_gfs.py ${strtday} ${endday} ${scratchdir}
 
@@ -58,12 +62,19 @@ cd ${scratchdir}
 ./make_available
 cd ${testdir}
 
+echo "AVAILABLE file made" 
+
 #Retrieve GFAS data and make RELEASES file
 
 conda activate fazein
+
+echo "Fazein conda activated"
+
 rm ${testdir}/options/RELEASES*
 cp $rundir/get_fire_RELEASES_GFAS_daily.py ${testdir}/options/
 python ${testdir}/options/get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) --enddate $( date -d $endday +'%F' )
+
+echo "GFAS files retrieved"
 
 # Add combo for releases
 
@@ -88,6 +99,8 @@ FLEXPART
 
 #plot the output files
 python plotting_flexpart_output.py ${strtday} ${out_dir}
+
+echo "Plots created"
 
 #put partposit files and header in folder
 mkdir "${out_dir}/${day}"
