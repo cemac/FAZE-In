@@ -6,3 +6,4 @@ WebApp/Applications/*/__pycache__/*
 WebApp/Applications/__pycache__/*
 __pycache__/*
 WebApp/Applications/data/*
+.spyproject/

@@ -11,7 +11,7 @@ module load gnu/4.8.1
 module load flexpart
 
 # Need a test here to see if a warm start is possible.
-warm_strt=FALSE
+warm_strt=TRUE
 
 # Dir paths
 rundir=$PWD
@@ -63,8 +63,9 @@ cd ${testdir}
 conda activate fazein
 rm ${testdir}/options/RELEASES*
 cp $rundir/get_fire_RELEASES_GFAS_daily.py ${testdir}/options/
-python ${testdir}/options/get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) $( date -d $endday +'%F' )
+python ${testdir}/options/get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) --enddate $( date -d $endday +'%F' )
 
+# Add combo for releases
 
 #update lines in COMMAND file to have start date of this day and end date of this day+run length
 sed -i "9s/.*/ IBDATE=         ${strtday}, ! Start date of the simulation   ; YYYYMMDD: YYYY=year, MM=month, DD=day /" ${testdir}/options/COMMAND
@@ -84,6 +85,9 @@ fi
 
 #run flexpart for this day
 FLEXPART
+
+#plot the output files
+python plotting_flexpart_output.py ${strtday} ${out_dir}
 
 #put partposit files and header in folder
 mkdir "${out_dir}/${day}"

@@ -104,10 +104,10 @@ def getargs():
                         help='[REQUIRED]\nFirst date for which data is required. Should be in format "YYYY-MM-DD"\n'+
                              'If data from only one date required, give that date here')
 
-    parser.add_argument('enddate', '-e',
+    parser.add_argument('--enddate', '-e',
                         type=str,
                         default="None",
-                        help='[OPTIONAL]Last date for which data is required. Should be in format "YYYY-MM-DD"\n'+
+                        help='[OPTIONAL]\nLast date for which data is required. Should be in format "YYYY-MM-DD"\n'+
                              'Only required if multiple days of data needed, for example in a cold start')
 
     args = parser.parse_args()
@@ -333,6 +333,8 @@ def main():
 
     if enddate == "None":
 
+        gfaspath = retrieve_GFAS(processdir, gfasdate)
+
         stat = process_gfas(gfaspath, processdir, gfasdate,gfasdate)
 
         if stat == 0:
@@ -341,6 +343,8 @@ def main():
             print('RELEASES file not written successfully')
 
     else:
+
+        gfaspath = retrieve_GFAS(processdir, gfasdate, enddate)
 
         stat = process_gfas(gfaspath, processdir, gfasdate,enddate)
 
