@@ -100,6 +100,8 @@ fi
 FLEXPART
 
 #plot the output files
+conda activate flex_extract
+
 python plotting_flexpart_output.py ${strtday} ${out_dir}
 
 echo "Plots created"
