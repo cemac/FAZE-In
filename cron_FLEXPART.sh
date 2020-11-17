@@ -18,14 +18,15 @@ rundir=$PWD
 scratchdir="/scratch/chmcsy/data"
 flexdir="/nfs/earcemac/chmcsy/FlexPart"
 testdir="/scratch/chmcsy/fwd_gfs_test"
-out_dir="${flexdir}/test_cronflex"
+out_dir_base="${flexdir}/test_cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-16 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-10 days' +"%Y%m%d" )
 
-#make directory on a68 for this to go in, and set as outpuexitt directory in pathnames
-#out_dir=${flexdir}/daily/$( date -d $day +"%Y%m%d" )/
+#make directory on a68 for this to go in, and set as output directory in pathnames
+
+out_dir=${out_dir_base}/daily/$( date -d $day +"%Y%m%d" )/
 
 mkdir -p ${out_dir}
 
@@ -62,7 +63,7 @@ cd ${scratchdir}
 ./make_available
 cd ${testdir}
 
-echo "AVAILABLE file made" 
+echo "AVAILABLE file made"
 
 #Retrieve GFAS data and make RELEASES file
 
