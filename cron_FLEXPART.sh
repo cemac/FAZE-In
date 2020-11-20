@@ -1,3 +1,15 @@
+# @Author: Christopher Symonds
+# @Date:   2020-11-18T10:07:25+00:00
+# @Email:  C.C.Symonds@leeds.ac.uk
+# @Project: FAZE-In
+# @Filename: cron_FLEXPART.sh
+# @Last modified by:   Christopher Symonds
+# @Last modified time: 2020-11-18T13:00:14+00:00
+# @License: MIT
+# @Copyright: University of Leeds
+
+
+
 #!/bin/bash
 
 #Replace with own conda path
@@ -26,7 +38,7 @@ day=$(TZ=":UTC" date -d '-10 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
-out_dir=${out_dir_base}/daily/$( date -d $day +"%Y%m%d" )/
+out_dir=${out_dir_base}/daily/$( date -d $day +"%Y%m%d" )
 
 mkdir -p ${out_dir}
 
@@ -72,10 +84,9 @@ conda activate fazein
 echo "Fazein conda activated"
 
 rm ${testdir}/options/RELEASES*
-cp $rundir/get_fire_RELEASES_GFAS_daily.py ${testdir}/options/
-cd ${testdir}/options
+cp -f $rundir/get_fire_RELEASES_GFAS_daily.py ${testdir}
+cd ${testdir}
 python get_fire_RELEASES_GFAS_daily.py $( date -d $strtday +'%F' ) --enddate $( date -d $endday +'%F' )
-cd ..
 
 echo "GFAS files retrieved"
 
@@ -92,7 +103,7 @@ sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs
 if [ "$warm_strt" == TRUE ]; then
   echo 'warm start'
   rm ${out_dir}/partposit_end
-  cp "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
+  cp -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
   sed -i '25s/.*/ IPIN=                  1, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /' ${testdir}/options/COMMAND
   rm ${out_dir}/partposit_${start_year}*
 fi

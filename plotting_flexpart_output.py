@@ -1,20 +1,43 @@
+#!/usr/bin/env/python3
+# -*- coding: utf-8 -*-
+
 """
-Created on Mon Feb 17 10:59:06 2020
+Plotting script for FlexPart output for the FAZE-In project
 
-@author: eelk
+Project: FAZE-In
+
+Usage : plotting_flexpart_output.py startdate datapath
+
+Args:
+    startdate: Start date of data
+    datapath: Description
+
 """
 
+# Built-in/Generic Imports
+from datetime import timedelta
+from sys import stderr, exit
+import argparse
+from os import path, makedirs
 
+# Libs
 from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from mpl_toolkits.basemap import Basemap
 import dateutil.parser as dateparse
-from datetime import timedelta
-from sys import stderr, exit
-import argparse
-from os import path, makedirs
+
+
+__author__ = 'C. Symonds and L. Kiely'
+__copyright__ = 'Copyright 2020, University of Leeds'
+__credits__ = ['C. Symonds', 'L. Kiely']
+__license__ = 'MIT'
+__version__ = '0.3.0'
+__maintainer__ = 'C. Symonds'
+__email__ = 'C.C.Symonds@leeds.ac.uk'
+__status__ = 'Development'
+
 
 class ArgumentsError(Exception):
     '''
@@ -41,6 +64,7 @@ class FileError(Exception):
     def __init__(self,msg):
         stderr.write('[FILE ERROR] : %s' % msg )
         exit(9)
+
 
 def getargs():
     '''
@@ -84,7 +108,7 @@ def getargs():
     datapath = args.datapath
 
     if not path.exists(datapath):
-        print('Directory to write gfs files to'
+        print('Directory to write png files to'
               + ' does not exist\nAttempting to create:')
         try:
             makedirs(datapath)
@@ -96,7 +120,6 @@ def getargs():
     if datapath and not path.isdir(datapath):
         raise FatalError(datapath + ' exists but is not a directory\n')
 
-
     return (strtstr,datapath)
 
 
@@ -104,7 +127,11 @@ def main():
 
     (date,datapath) = getargs()
 
-    flex_file = Dataset(path.join(datapath,'grid_conc_'+date+'000000.nc'),'r+',format='NETCDF4')
+    try:
+        flex_file = Dataset(path.join(datapath,'grid_conc_'+date+'000000.nc'),'r+',format='NETCDF4')
+    except:
+        raise FileError("Could not find file {}".format(path.join(datapath,'grid_conc_'+date+'000000.nc')))
+
     lat = flex_file.variables['latitude'][:]
     lon = flex_file.variables['longitude'][:]
     time = flex_file.variables['time'][:]  ##in seconds from start date
@@ -114,7 +141,7 @@ def main():
     PM25 = flex_file.variables['spec003_mr'][0,0,:,:,:,:]/1000 #ug/m3
     flex_file.close()
 
-        ##average up to 20m###
+    ##average up to 20m###
     for l in range(0,2):
         if l ==0:
             h = height[l]
@@ -132,6 +159,7 @@ def main():
         ###Map plot of each 3 hour timestep - labelled as time from start date ###
         ###To make video from plots use:  ffmpeg -r 2 -f image2 -s 1920x1080 -i PM25_map_%d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p PM25_2015.mp4
         filedate = startdate + timedelta(0,int(time[i]))
+        print ("Making file for file date = {}".format(filedate))
         ax = plt.figure(figsize = (14,7))
         plt.rcParams.update({'font.size': 13})
         vals = np.array([25,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,1500,2000,2500,3000,3500,4000,4500,5000,6000,7000,8000,10000,15000,20000])
@@ -154,3 +182,6 @@ def main():
         filedate = startdate + timedelta(0,int(time[i]))
         plt.savefig(path.join(datapath,'PM25_above20_gfs_ecmwf_map_'+filedate.strftime("%Y%m%d%H%M")+'.png'))
         plt.close()
+
+if __name__ == "__main__":
+    main()
