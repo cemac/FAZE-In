@@ -194,7 +194,7 @@ def main():
     norm = mpl.colors.BoundaryNorm(col_bounds,newcmp.N)
 
     font = {'weight' : 'bold',
-            'size'   : 6}
+            'size'   : 4}
 
     mpl.rc('font', **font)
 
