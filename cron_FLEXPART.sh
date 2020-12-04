@@ -114,9 +114,11 @@ FLEXPART
 #plot the output files
 conda activate flex_extract
 
-python plotting_flexpart_output.py ${strtday} ${out_dir}
+python plot_flexpart.py ${strtday} ${out_dir} -v BC
 
 echo "Plots created"
+
+montage -background transparent -tile 8x -geometry 900x800+0+0 *.png spritesheet.png
 
 #put partposit files and header in folder
 mkdir "${out_dir}/${day}"
