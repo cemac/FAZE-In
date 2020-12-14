@@ -34,7 +34,7 @@ out_dir_base="${flexdir}/test_cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-10 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-2 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
@@ -48,6 +48,7 @@ $testdir/options
 $out_dir
 $scratchdir
 $scratchdir/AVAILABLE
+
 EOF
 
 if [ "$warm_strt" = TRUE ]; then
@@ -118,7 +119,8 @@ python plot_flexpart.py ${strtday} ${out_dir} -v BC
 
 echo "Plots created"
 
-montage -background transparent -tile 8x -geometry 900x800+0+0 *.png spritesheet.png
+cd ${out_dir}
+montage -background transparent -tile 8x -geometry 675x600+0+0 *.png spritesheet.png
 
 #put partposit files and header in folder
 mkdir "${out_dir}/${day}"

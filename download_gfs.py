@@ -114,14 +114,7 @@ def create_filenames(d,variant):
         from the runs at 0, 6, 12 and 18 UTC
         only t=0 and t=3 will be downloaded
     """
-
-#    if variant == "3":
-#        ext = ".grb"
-#    else:
-#        ext = ".grb2"
-
     ext = ".grb2"
-
     filelist = list()
     for t in ["0000", "0600", "1200", "1800"]:
         for t2 in ["000", "003"]:
@@ -129,23 +122,38 @@ def create_filenames(d,variant):
     return filelist
 
 def geturl(d,variant):
-
     if variant=="3":
         grid = "grid-003-1.0-degree"
     else:
         grid = "grid-004-0.5-degree"
-
     return "https://www.ncei.noaa.gov/data/global-forecast-system/access/"+grid+"/forecast/"+d.strftime('%Y%m')+"/"+d.strftime('%Y%m%d')+"/"
 
 def getfilelist(d,variant):
-
     url = geturl(d, variant)
-
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
     alllinks = [x['href'] for x in soup.findAll('a')[5:]]
-
     return [x for x in alllinks if re.search("_00(0|3).grb2?$",x)]
+
+def create_lastfilenames(d,variant):
+    """
+        creates filenames for final date,
+        from the runs at 0, 6, 12 and 18 UTC
+        only t=0 and t=3 will be downloaded
+    """
+    ext = ".grb2"
+    filelist = list()
+    for t in ["0000"]:
+        for t2 in ["000", "003"]:
+            filelist.append("gfs_"+variant+"_"+d.strftime('%Y%m%d')+"_"+t+"_"+t2+ext)
+    return filelist
+
+def getlastfilelist(d,variant):
+    url = geturl(d, variant)
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    alllinks = [x['href'] for x in soup.findAll('a')[5:]]
+    return [x for x in alllinks if re.search("0000_00(0|3).grb2?$",x)]
 
 def download_file(path, link, destination):
     """
@@ -198,17 +206,43 @@ def get_gfs(start_date,end_date,destination,variant="4"):
 
     for d in date_list:
         baseurl = geturl(d,variant)
+        print (baseurl)
         try:
             file_list_http = getfilelist(d, variant)
-            file_list = create_filenames(d,variant)
-            for f in file_list:
-                if f in file_list_http:
-                    print ("  "+f+ " found, download as "+os.path.join(destination,f))
-                    download_file(baseurl, f, destination)
-                else:
-                    print ("  "+ f + "not found")
+            print (file_list_http)
         except:
             print (d.strftime('%Y-%m-%d') + " Directory not found")
+        try:
+            file_list = create_filenames(d,variant)
+            print (file_list)
+        except:
+            print ("Could not construct the file list")
+        for f in file_list:
+            if f in file_list_http:
+                print ("  "+f+ " found, download as "+os.path.join(destination,f))
+                download_file(baseurl, f, destination)
+            else:
+                print ("  "+ f + "not found")
+
+    last = date_list[-1] + datetime.timedelta(days=1)
+    baseurl = geturl(last,variant)
+    print (baseurl)
+    try:
+        file_list_http = getlastfilelist(last, variant)
+        print (file_list_http)
+    except:
+        print (last.strftime('%Y-%m-%d') + " Directory not found")
+    try:
+        file_list = create_lastfilenames(last,variant)
+        print (file_list)
+    except:
+        print ("Could not construct the file list")
+    for f in file_list:
+        if f in file_list_http:
+            print ("  "+f+ " found, download as "+os.path.join(destination,f))
+            download_file(baseurl, f, destination)
+        else:
+            print ("  "+ f + "not found")
 
     print ("")
 
