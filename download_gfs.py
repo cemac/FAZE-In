@@ -206,15 +206,12 @@ def get_gfs(start_date,end_date,destination,variant="4"):
 
     for d in date_list:
         baseurl = geturl(d,variant)
-        print (baseurl)
         try:
             file_list_http = getfilelist(d, variant)
-            print (file_list_http)
         except:
             print (d.strftime('%Y-%m-%d') + " Directory not found")
         try:
             file_list = create_filenames(d,variant)
-            print (file_list)
         except:
             print ("Could not construct the file list")
         for f in file_list:
@@ -226,15 +223,12 @@ def get_gfs(start_date,end_date,destination,variant="4"):
 
     last = date_list[-1] + datetime.timedelta(days=1)
     baseurl = geturl(last,variant)
-    print (baseurl)
     try:
         file_list_http = getlastfilelist(last, variant)
-        print (file_list_http)
     except:
         print (last.strftime('%Y-%m-%d') + " Directory not found")
     try:
         file_list = create_lastfilenames(last,variant)
-        print (file_list)
     except:
         print ("Could not construct the file list")
     for f in file_list:

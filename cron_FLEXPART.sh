@@ -109,8 +109,9 @@ if [ "$warm_strt" == TRUE ]; then
   rm ${out_dir}/partposit_${start_year}*
 fi
 
+if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
 #run flexpart for this day
-FLEXPART
+FLEXPART > ${flexdir}/FlexOut.out
 
 #plot the output files
 conda activate flex_extract
