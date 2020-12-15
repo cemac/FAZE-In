@@ -233,8 +233,12 @@ def get_gfs(start_date,end_date,destination,variant="4"):
         print ("Could not construct the file list")
     for f in file_list:
         if f in file_list_http:
-            print ("  "+f+ " found, download as "+os.path.join(destination,f))
-            download_file(baseurl, f, destination)
+            newfile = os.path.join(destination,f)
+            if not os.path.exists(newfile):
+                print ("  "+f+ " found, download as "+newfile)
+                download_file(baseurl, f, destination)
+            else:
+                print ("  "+f+ " found on disk - already downloaded")
         else:
             print ("  "+ f + "not found")
 

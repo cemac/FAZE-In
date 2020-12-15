@@ -175,7 +175,7 @@ def retrieve_GFAS(processdir, gfasdate, gfasend="None"):
 
     if gfasend == "None":
 
-        GFAS_target = 'GFAS_2015_'+gfasdate+'_auto.nc'
+        GFAS_target = 'GFAS_'+gfasdate+'_auto.nc'
         datadate = gfasdate
 
     else:
@@ -253,12 +253,12 @@ def process_gfas(gfaspath, processdir, gfasdate, enddate):
     date1=dateparse.parse(gfasdate).date()
     date2=dateparse.parse(enddate).date()
     datelen=(date2-date1).days
-    
+
     releasesfile = path.join(RELEASES_dir,"RELEASES")
-    
+
     if path.exists(releasesfile):
         releasesfile = next_path(path.join(RELEASES_dir, fname[:-4]+'-%s.txt'))
-    
+
     with open(releasesfile,'w') as f_new:
 
         f_new.write('&RELEASES_CTRL \n')
