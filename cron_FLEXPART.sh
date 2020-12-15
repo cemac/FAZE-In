@@ -23,7 +23,7 @@ module load gnu/4.8.1
 module load flexpart
 
 # Need a test here to see if a warm start is possible.
-warm_strt=TRUE
+warm_strt=FALSE
 
 # Dir paths
 rundir=$PWD
@@ -34,7 +34,7 @@ out_dir_base="${flexdir}/test_cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-3 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-5 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
@@ -54,7 +54,7 @@ EOF
 if [ "$warm_strt" = TRUE ]; then
   datechunk=3 # 1 day, plus one on either side
   strtday=$day
-  endday=$day
+  endday=$day:
 else
   datechunk=22 # 20 days, plus one on either side
   endday=$day
