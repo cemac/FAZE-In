@@ -116,7 +116,7 @@ FLEXPART > ${flexdir}/FlexOut.out
 #plot the output files
 conda activate flex_extract
 
-python plot_flexpart.py ${strtday} ${out_dir} -v BC
+python ${rundir}/plot_flexpart.py ${strtday} ${out_dir} -v BC
 
 echo "Plots created"
 
