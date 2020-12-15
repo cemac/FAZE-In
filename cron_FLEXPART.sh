@@ -30,7 +30,7 @@ rundir=$PWD
 scratchdir="/scratch/chmcsy/data"
 flexdir="/nfs/earcemac/chmcsy/FlexPart"
 testdir="/scratch/chmcsy/fwd_gfs_test"
-out_dir_base="${flexdir}/test_cronflex"
+out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
