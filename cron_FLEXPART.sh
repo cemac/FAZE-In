@@ -34,7 +34,7 @@ out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-6 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-5 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
@@ -101,11 +101,12 @@ sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs
 #if its not the first day then want to use a warm start
 #remove partposit_end file and replace it with partposit_file from run before
 #update line in COMMAND file to have a warm start
-if [ "$warm_strt" == TRUE ]; then
+if [ "$warm_strt" == TRUE ]; thenech
   echo 'warm start'
   if [ -f ${out_dir}/partposit_end ]; then rm ${out_dir}/partposit_end; fi
   cp -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
   sed -i '25s/.*/ IPIN=                  1, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /' ${testdir}/options/COMMAND
+  start_year=$( date -d $day +'%Y' )
   rm ${out_dir}/partposit_${start_year}*
 fi
 
@@ -121,10 +122,24 @@ python ${rundir}/plot_flexpart.py ${strtday} ${out_dir} -v BC
 echo "Plots created"
 
 cd ${out_dir}
-montage -background transparent -tile 8x -geometry 675x600+0+0 *.png spritesheet.png
+spritedays=5
+mkdir -p ${out_dir}/spritebuild
+plotday=$( date -d "${day} +1 days" +"%Y%m%d" )
+cp 20m-${plotday}* spritebuild
+for i in `seq 0 $spritedays`; do
+  plotday=$( date -d "${day} -${i} days" +"%Y%m%d" )
+  cp 20m-${plotday}* spritebuild
+done
+
+cd ${out_dir}/spritebuild
+rm 20m-${plotday}0000.png
+
+montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ../spritesheet.png
+cd ..
+rm -rf spritebuild
 
 #put partposit files and header in folder
-mkdir "${out_dir}/${day}"
+mkdir -p "${out_dir}/${day}"
 for file in ${out_dir}/partposit_*000000; do
   cp $file "${out_dir}/${day}/"
 done
