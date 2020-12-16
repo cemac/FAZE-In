@@ -23,7 +23,7 @@ module load gnu/4.8.1
 module load flexpart
 
 # Need a test here to see if a warm start is possible.
-warm_strt=FALSE
+warm_strt=TRUE
 
 # Dir paths
 rundir=$PWD
@@ -34,7 +34,7 @@ out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-5 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-6 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
@@ -54,7 +54,7 @@ EOF
 if [ "$warm_strt" = TRUE ]; then
   datechunk=3 # 1 day, plus one on either side
   strtday=$day
-  endday=$day:
+  endday=$day
 else
   datechunk=22 # 20 days, plus one on either side
   endday=$day
@@ -95,7 +95,7 @@ echo "GFAS files retrieved"
 
 #update lines in COMMAND file to have start date of this day and end date of this day+run length
 sed -i "9s/.*/ IBDATE=         ${strtday}, ! Start date of the simulation   ; YYYYMMDD: YYYY=year, MM=month, DD=day /" ${testdir}/options/COMMAND
-sed -i "11s/.*/ IEDATE=         ${endday},! End date of the simulation     ; same format as IBDATE  /" ${testdir}/options/COMMAND
+sed -i "11s/.*/ IEDATE=         $( date -d "${endday} +1 days" +"%Y%m%d" ),! End date of the simulation     ; same format as IBDATE  /" ${testdir}/options/COMMAND
 sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /' ${testdir}/options/COMMAND
 
 #if its not the first day then want to use a warm start
@@ -103,7 +103,7 @@ sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs
 #update line in COMMAND file to have a warm start
 if [ "$warm_strt" == TRUE ]; then
   echo 'warm start'
-  rm ${out_dir}/partposit_end
+  if [ -f ${out_dir}/partposit_end ]; then rm ${out_dir}/partposit_end; fi
   cp -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
   sed -i '25s/.*/ IPIN=                  1, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /' ${testdir}/options/COMMAND
   rm ${out_dir}/partposit_${start_year}*
