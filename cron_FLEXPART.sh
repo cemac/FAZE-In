@@ -30,15 +30,15 @@ rundir=$PWD
 scratchdir="/scratch/chmcsy/data"
 flexdir="/nfs/earcemac/chmcsy/FlexPart"
 testdir="/scratch/chmcsy/fwd_gfs_test"
-out_dir_base="${flexdir}/test_cronflex"
+out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-10 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-5 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
-out_dir=${out_dir_base}/daily/$( date -d $day +"%Y%m%d" )
+out_dir=${out_dir_base}/daily
 
 mkdir -p ${out_dir}
 
@@ -48,12 +48,13 @@ $testdir/options
 $out_dir
 $scratchdir
 $scratchdir/AVAILABLE
+
 EOF
 
 if [ "$warm_strt" = TRUE ]; then
   datechunk=3 # 1 day, plus one on either side
   strtday=$day
-  endday=$day
+  endday=$day:
 else
   datechunk=22 # 20 days, plus one on either side
   endday=$day
@@ -108,17 +109,19 @@ if [ "$warm_strt" == TRUE ]; then
   rm ${out_dir}/partposit_${start_year}*
 fi
 
+if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
 #run flexpart for this day
-FLEXPART
+FLEXPART > ${flexdir}/FlexOut.out
 
 #plot the output files
 conda activate flex_extract
 
-python plot_flexpart.py ${strtday} ${out_dir} -v BC
+python ${rundir}/plot_flexpart.py ${strtday} ${out_dir} -v BC
 
 echo "Plots created"
 
-montage -background transparent -tile 8x -geometry 900x800+0+0 *.png spritesheet.png
+cd ${out_dir}
+montage -background transparent -tile 8x -geometry 675x600+0+0 *.png spritesheet.png
 
 #put partposit files and header in folder
 mkdir "${out_dir}/${day}"
