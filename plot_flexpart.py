@@ -38,7 +38,7 @@ import iris
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-
+from math import log10,floor
 
 iris.FUTURE.netcdf_promote = True
 
@@ -220,6 +220,7 @@ def main():
         plot_ax.set_yticks(range(lat_min + 4, lat_max, 10), crs=ccrs.PlateCarree())
         lon_formatter = LongitudeFormatter(number_format='.1f', degree_symbol='')
         lat_formatter = LatitudeFormatter(number_format='.1f', degree_symbol='')
+        #cbarformatter = "{:4.{prec}f}".format(x, prec=min(2,2-floor(log10(abs(x)))))
         plot_ax.xaxis.set_major_formatter(lon_formatter)
         plot_ax.yaxis.set_major_formatter(lat_formatter)
 
@@ -240,7 +241,7 @@ def main():
                      norm = norm)
 
         plt.clim(col_bound_min, col_bound_max)
-        plt.colorbar(orientation='horizontal', extend = 'both')
+        plt.colorbar(orientation='horizontal')
 
         title = '{:,}m {}'.format(i_height, title_time)
         plot_ax.set_title(title)
