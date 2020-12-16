@@ -40,7 +40,7 @@ import numpy as np
 import argparse
 from math import log10,floor
 
-iris.FUTURE.netcdf_promote = True
+#iris.FUTURE.netcdf_promote = True
 
 
 class ArgumentsError(Exception):

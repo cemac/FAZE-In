@@ -34,7 +34,7 @@ out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
 #Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-4 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-3 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
@@ -112,7 +112,7 @@ fi
 
 if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
 #run flexpart for this day
-FLEXPART > ${flexdir}/FlexOut.out
+FLEXPART #> ${flexdir}/FlexOut.out
 
 #plot the output files
 conda activate flex_extract
