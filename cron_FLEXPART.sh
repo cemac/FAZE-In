@@ -101,7 +101,7 @@ sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs
 #if its not the first day then want to use a warm start
 #remove partposit_end file and replace it with partposit_file from run before
 #update line in COMMAND file to have a warm start
-if [ "$warm_strt" == TRUE ]; thenech
+if [ "$warm_strt" == TRUE ]; then
   echo 'warm start'
   if [ -f ${out_dir}/partposit_end ]; then rm ${out_dir}/partposit_end; fi
   cp -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
