@@ -33,7 +33,7 @@ testdir="/scratch/chmcsy/fwd_gfs_test"
 out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
 
-#Looks at day before yesterday to yesterday. 13:00 to account for any daylight savings effects.
+#Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
 day=$(TZ=":UTC" date -d '-6 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
