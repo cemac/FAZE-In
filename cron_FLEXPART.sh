@@ -28,11 +28,11 @@ warm_strt=TRUE
 # Dir paths
 rundir=$PWD
 scratchdir="/scratch/chmcsy/data"
-flexdir="/nfs/earcemac/chmcsy/FlexPart"
+flexdir="/scratch/chmcsy/FlexPart"
 testdir="/scratch/chmcsy/fwd_gfs_test"
 out_dir_base="${flexdir}/cronflex"
 flextractdir="/scratch/chmcsy/flex_extract/"
-spritedir=""
+spritedir="/nfs/see-fs-02_users/chmcsy/Git_Repos/Faze-In_App/Applications/static/sprites"
 
 #Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
 day=$(TZ=":UTC" date -d '-4 days' +"%Y%m%d" )
@@ -135,7 +135,7 @@ done
 cd ${out_dir}/spritebuild
 rm 20m-${plotday}0000.png
 
-montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ../spritesheet.png
+montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ${spritedir}/spritesheet.png
 cd ..
 rm -rf spritebuild
 
