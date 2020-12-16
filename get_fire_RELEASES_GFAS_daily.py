@@ -183,7 +183,7 @@ def retrieve_GFAS(processdir, gfasdate, gfasend="None"):
         date1=dateparse.parse(gfasdate).date()
         date2=dateparse.parse(gfasend).date()
         datelen="{0:03d}".format((date2-date1).days)
-        GFAS_target = 'GFAS_2015_'+gfasdate+'_+'+datelen+'days_auto.nc'
+        GFAS_target = 'GFAS'+gfasdate+'_+'+datelen+'days_auto.nc'
         datadate=gfasdate+'/to/'+gfasend
 
     server.retrieve({
