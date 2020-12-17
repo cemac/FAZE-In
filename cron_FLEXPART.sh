@@ -142,7 +142,12 @@ cd ${out_dir}/spritebuild
 rm 20m-${plotday}0000.png
 
 montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ${spritedir}/spritesheet.png
-cd ..
+
+cd ${spritedir}
+git add spritesheet
+git commit -m "Spritesheet updated for ${day}"
+#git push #(need to set up ssh key or similar)
+cd ${out_dir}
 rm -rf spritebuild
 
 #put partposit files and header in folder
