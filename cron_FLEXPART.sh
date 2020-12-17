@@ -22,9 +22,6 @@ module load user
 module load gnu/4.8.1
 module load flexpart
 
-# Need a test here to see if a warm start is possible.
-warm_strt=TRUE
-
 # Dir paths
 rundir=$PWD
 scratchdir="/scratch/chmcsy/data"
@@ -35,13 +32,19 @@ flextractdir="/scratch/chmcsy/flex_extract/"
 spritedir="/nfs/see-fs-02_users/chmcsy/Git_Repos/Faze-In_App/Applications/static/sprites"
 
 #Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-4 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-3 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
 out_dir=${out_dir_base}/daily
 
 mkdir -p ${out_dir}
+
+if [ -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" ];
+  warm_strt = TRUE
+else
+  warm_strt = FALSE
+fi
 
 # Make pathnames file
 cat > ${testdir}/pathnames <<-EOF
@@ -57,7 +60,7 @@ if [ "$warm_strt" = TRUE ]; then
   strtday=$day
   endday=$day
 else
-  datechunk=22 # 20 days, plus one on either side
+  datechunk=27 # 20 days, plus five days of output data and one day either side
   endday=$day
   strtday=$( date -d "$day -$datechunk days" +"%Y%m%d" )
 fi
@@ -73,6 +76,7 @@ echo "Conda env activated for flex_extract"
 
 python $rundir/download_gfs.py ${strtday} ${endday} ${scratchdir}
 
+cp make_available ${scratchdir}
 cd ${scratchdir}
 ./make_available
 cd ${testdir}
@@ -103,15 +107,17 @@ sed -i '25s/.*/ IPIN=                  0, ! Warm start from particle dump (needs
 #remove partposit_end file and replace it with partposit_file from run before
 #update line in COMMAND file to have a warm start
 if [ "$warm_strt" == TRUE ]; then
+  #if [ -d ${out_dir_base}/backup_data ]; then rm -rf ${out_dir_base}/backup_data; fi
+  #cp -r ${out_dir} ${out_dir_base}/backup_data
   echo 'warm start'
   if [ -f ${out_dir}/partposit_end ]; then rm ${out_dir}/partposit_end; fi
   cp -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" "${out_dir}/partposit_end"
   sed -i '25s/.*/ IPIN=                  1, ! Warm start from particle dump (needs previous partposit_end file); [0]no 1]yes  /' ${testdir}/options/COMMAND
   start_year=$( date -d $day +'%Y' )
-  rm ${out_dir}/partposit_${start_year}*
+  rm ${out_dir}/partposit_$( date -d $day +'%Y%m%d' )*
 fi
 
-if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
+#if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
 #run flexpart for this day
 FLEXPART #> ${flexdir}/FlexOut.out
 
