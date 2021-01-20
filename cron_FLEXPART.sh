@@ -40,11 +40,13 @@ out_dir=${out_dir_base}/daily
 
 mkdir -p ${out_dir}
 
-if [ -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" ];
-  warm_strt = TRUE
+if [ -f "${out_dir}/partposit_$( date -d $day +'%Y%m%d%H%M%S' )" ]; then
+  warm_strt=TRUE
 else
-  warm_strt = FALSE
+  warm_strt=FALSE
 fi
+
+echo "Warm Start = $warm_strt"
 
 # Make pathnames file
 cat > ${testdir}/pathnames <<-EOF
