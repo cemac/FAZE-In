@@ -3,18 +3,18 @@
 # @Email:  C.C.Symonds@leeds.ac.uk
 # @Project: FAZE-In
 # @Filename: cron_FLEXPART.sh
-# @Last modified by:   Christopher Symonds
-# @Last modified time: 2020-11-18T13:00:14+00:00
+# @Last modified by:   chris
+# @Last modified time: 2021-01-20T19:49:21+00:00
 # @License: MIT
 # @Copyright: University of Leeds
 
 
 
-#!/bin/bash
+#! /bin/bash --login
 
 #Replace with own conda path
 . /nfs/earcemac/chmcsy/anaconda3/etc/profile.d/conda.sh
-
+. /apps/Modules/3.2.10/init/bash
 . /scratch/cemac/cemac.sh
 
 module purge
