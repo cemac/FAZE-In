@@ -47,13 +47,14 @@ fi
 echo "Warm Start = $warm_strt"
 
 # Make pathnames file
-cat > ${testdir}/pathnames <<-EOF
+cat > ${testdir}/pathnames << -EOF
 
 $testdir/options
 $out_dir
 $scratchdir
 $scratchdir/AVAILABLE
-EOF
+
+-EOF
 
 if [ "$warm_strt" = TRUE ]; then
   datechunk=3 # 1 day, plus one on either side
@@ -144,9 +145,9 @@ rm 20m-${plotday}0000.png
 montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ${spritedir}/spritesheet.png
 
 cd ${spritedir}
-git add spritesheet
+git add spritesheet.png
 git commit -m "Spritesheet updated for ${day}"
-#git push #(need to set up ssh key or similar)
+git push # credentials stored
 cd ${out_dir}
 rm -rf spritebuild
 
