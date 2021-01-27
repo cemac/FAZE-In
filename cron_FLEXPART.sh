@@ -8,14 +8,12 @@
 # @License: MIT
 # @Copyright: University of Leeds
 
-
-
-#! /bin/bash --login
+#! /bin/bash -l
 
 #Replace with own conda path
-. /nfs/earcemac/chmcsy/anaconda3/etc/profile.d/conda.sh
-. /apps/Modules/3.2.10/init/bash
+. /etc/profile.d/modules.sh
 . /scratch/cemac/cemac.sh
+. /nfs/earcemac/chmcsy/anaconda3/etc/profile.d/conda.sh
 
 module purge
 module load user
@@ -50,11 +48,11 @@ echo "Warm Start = $warm_strt"
 
 # Make pathnames file
 cat > ${testdir}/pathnames <<-EOF
+
 $testdir/options
 $out_dir
 $scratchdir
 $scratchdir/AVAILABLE
-
 EOF
 
 if [ "$warm_strt" = TRUE ]; then
