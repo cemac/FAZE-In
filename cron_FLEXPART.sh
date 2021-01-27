@@ -48,7 +48,6 @@ echo "Warm Start = $warm_strt"
 
 # Make pathnames file
 cat > ${testdir}/pathnames << -EOF
-
 $testdir/options
 $out_dir
 $scratchdir
