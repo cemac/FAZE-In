@@ -145,7 +145,7 @@ rm 20m-${plotday}0000.png
 montage -background transparent -tile 8x -geometry 675x600+0+0 *.png ${spritedir}/spritesheet.png
 
 cd ${spritedir}
-git add spritesheet.png
+git add -u
 git commit -m "Spritesheet updated for ${day}"
 git push # credentials stored
 cd ${out_dir}
