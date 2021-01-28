@@ -117,9 +117,8 @@ if [ "$warm_strt" == TRUE ]; then
   rm ${out_dir}/partposit_$( date -d $day +'%Y%m%d' )*
 fi
 
-#if [ -f ${flexdir}/FlexOut.out ]; then rm ${flexdir}/FlexOut.out; fi
 #run flexpart for this day
-FLEXPART #> ${flexdir}/FlexOut.out
+FLEXPART
 
 #plot the output files
 conda activate flex_extract
@@ -156,3 +155,45 @@ for file in ${out_dir}/partposit_*000000; do
   cp $file "${out_dir}/${day}/"
 done
 cp "${out_dir}/header" "${out_dir}/${day}/"
+
+# Remove old files (AVAILABLE files older than 5 days, all others older than 30 days)
+cleanupdate=$( date -d "${day} -30 days" +"%Y%m%d" )
+cd ${scratchdir}
+for f in gfs_4_*; do
+  filedate=${f:6:8}
+  if [[ $filedate -lt $cleanupdate ]]; then
+    rm $f
+  fi
+done
+cleanupdate2=$( date -d "${day} -5 days" +"%s" )
+for f in AVAILABLE.*; do
+  filedate=${f:10:10}
+  if [[ $filedate -lt $cleanupdate2 ]]; then
+    rm $f
+  fi
+done
+cd ${outdir}
+for f in 20m-*.png; do
+  filedate=${f:4:8}
+  if [[ $filedate -lt $cleanupdate ]]; then
+    rm $f
+  fi
+done
+for f in partposit_20*; do
+  filedate=${f:10:8}
+  if [[ $filedate -lt $cleanupdate ]]; then
+    rm $f
+  fi
+done
+for f in shortposit_20*; do
+  filedate=${f:11:8}
+  if [[ $filedate -lt $cleanupdate ]]; then
+    rm $f
+  fi
+done
+for f in grid_conc_*.nc; do
+  filedate=${f:10:8}
+  if [[ $filedate -lt $cleanupdate ]]; then
+    rm $f
+  fi
+done
