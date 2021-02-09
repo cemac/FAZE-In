@@ -161,39 +161,39 @@ cleanupdate=$( date -d "${day} -30 days" +"%Y%m%d" )
 cd ${scratchdir}
 for f in gfs_4_*; do
   filedate=${f:6:8}
-  if [[ $filedate -lt $cleanupdate ]]; then
+  if [ $filedate -lt $cleanupdate ]; then
     rm $f
   fi
 done
 cleanupdate2=$( date -d "${day} -5 days" +"%s" )
 for f in AVAILABLE.*; do
   filedate=${f:10:10}
-  if [[ $filedate -lt $cleanupdate2 ]]; then
+  if [ $filedate -lt $cleanupdate2 ]; then
     rm $f
   fi
 done
-cd ${outdir}
+cd ${out_dir}
 for f in 20m-*.png; do
   filedate=${f:4:8}
-  if [[ $filedate -lt $cleanupdate ]]; then
+  if [ $filedate -lt $cleanupdate ]; then
     rm $f
   fi
 done
 for f in partposit_20*; do
   filedate=${f:10:8}
-  if [[ $filedate -lt $cleanupdate ]]; then
+  if [ $filedate -lt $cleanupdate ]; then
     rm $f
   fi
 done
 for f in shortposit_20*; do
   filedate=${f:11:8}
-  if [[ $filedate -lt $cleanupdate ]]; then
+  if [ $filedate -lt $cleanupdate ]; then
     rm $f
   fi
 done
 for f in grid_conc_*.nc; do
   filedate=${f:10:8}
-  if [[ $filedate -lt $cleanupdate ]]; then
+  if [ $filedate -lt $cleanupdate ]; then
     rm $f
   fi
 done
