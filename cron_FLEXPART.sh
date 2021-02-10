@@ -30,7 +30,7 @@ flextractdir="/scratch/chmcsy/flex_extract/"
 spritedir="/nfs/see-fs-02_users/chmcsy/Git_Repos/Faze-In_App/Applications/static/sprites"
 
 #Looks at day before yesterday to yesterday. UTC to account for any daylight savings effects.
-day=$(TZ=":UTC" date -d '-3 days' +"%Y%m%d" )
+day=$(TZ=":UTC" date -d '-4 days' +"%Y%m%d" )
 
 #make directory on a68 for this to go in, and set as output directory in pathnames
 
