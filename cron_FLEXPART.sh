@@ -137,6 +137,9 @@ for i in `seq 0 $spritedays`; do
   cp 20m-${plotday}* spritebuild
 done
 
+cd ${spritedir}
+git pull
+
 cd ${out_dir}/spritebuild
 rm 20m-${plotday}0000.png
 
