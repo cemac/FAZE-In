@@ -161,7 +161,7 @@ def retrieve_GFAS(processdir, gfasdate, gfasend="None"):
     Out : Path to downloaded GFAS data file(s) (in netCDF format)
     '''
 
-    server = ECMWFDataServer(url="https://api.ecmwf.int/v1",key="cd85b3670e9c314f617d7b36f50b032f",email="C.C.Symonds@leeds.ac.uk")
+    server = ECMWFDataServer(url="https://apps.ecmwf.int/v1",key="dad412d11c10bdb9f050b5bcbb6e5737",email="C.C.Symonds@leeds.ac.uk")
 
     GFAS_path = path.join(processdir,"GFAS")
 
